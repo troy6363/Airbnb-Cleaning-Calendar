@@ -416,6 +416,21 @@ if (properties.some(p => p.url)) {
     fetchAllCalendars();
 }
 
+// Re-add updateAdminUI function definition correctly
+function updateAdminUI() {
+    if (isAdmin) {
+        document.body.classList.add('admin-enabled');
+        adminLockBtn.textContent = '🔓';
+        adminLockBtn.classList.add('unlocked');
+        adminLockBtn.title = "Lock Admin Mode";
+    } else {
+        document.body.classList.remove('admin-enabled');
+        adminLockBtn.textContent = '🔒';
+        adminLockBtn.classList.remove('unlocked');
+        adminLockBtn.title = "Unlock Admin Mode";
+    }
+}
+
 adminLockBtn.addEventListener('click', () => {
     if (isAdmin) {
         // Lock
