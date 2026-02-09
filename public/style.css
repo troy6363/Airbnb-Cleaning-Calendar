@@ -223,22 +223,25 @@ body.admin-enabled .admin-only-control {
         padding: 0;
         border-radius: 50%;
         color: transparent !important;
-        /* Hide full text */
+        /* Hide full text color */
         font-size: 0 !important;
-        /* Ensure text is hidden */
+        /* Hide text layout */
         overflow: hidden;
         margin: 2px auto;
-        display: block;
-        text-align: center;
-        line-height: 20px;
+
+        /* Flex Center */
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
     }
 
     .cleaning-badge::first-letter {
-        font-size: 12px;
+        font-size: 11px;
+        /* Slightly smaller for better fit */
         color: white;
         font-weight: 700;
-        display: inline-block;
-        /* Helps with centering sometimes */
+        /* Line-height trick not needed with flexbox, but harmless */
+        line-height: 1;
     }
 
     /* Hide the 'x' on mobile hover since it's touch */
