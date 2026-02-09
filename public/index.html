@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cleaner Calendar</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ical.js/1.5.0/ical.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="app-container">
+        <header>
+            <h1>Airbnb Cleaning Schedule</h1>
+            <button id="admin-lock-btn" class="icon-btn" title="Admin Access">🔒</button>
+        </header>
+
+        <div class="controls">
+            <div class="controls-header">
+                <div id="calendar-legend">
+                    <!-- Legend items generated here -->
+                </div>
+                <!-- Admin Only Toggle -->
+                <button id="toggle-properties" class="secondary-btn admin-only-control"
+                    style="display: none; margin-left: auto; margin-right: 10px;">Manage Properties</button>
+
+                <div class="action-buttons">
+                    <span id="last-updated" class="last-updated-text"></span>
+                    <button id="load-calendar">Refresh Calendar</button>
+                </div>
+            </div>
+
+            <!-- Hidden inputs as requested -->
+            <div id="properties-container" class="hidden" style="display: none;">
+                <div id="property-list"></div>
+                <button id="add-property" class="secondary-btn">+ Add Property</button>
+            </div>
+        </div>
+
+        <div class="calendar-header">
+            <button id="prev-month">&lt;</button>
+            <h2 id="current-month">Month Year</h2>
+            <button id="next-month">&gt;</button>
+        </div>
+
+        <div class="calendar-grid" id="calendar-grid">
+            <!-- Calendar days will be generated here -->
+        </div>
+    </div>
+    <div id="add-cleaning-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Add Cleaning</h3>
+            <p id="modal-date-display"></p>
+            <div id="modal-property-list">
+                <!-- Buttons for each property will be generated here -->
+            </div>
+            <button id="close-modal" class="secondary-btn" style="margin-top: 16px; width: 100%;">Cancel</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>

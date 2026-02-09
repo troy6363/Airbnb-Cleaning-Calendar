@@ -1,0 +1,428 @@
+:root {
+    --bg-color: #F7F7F7;
+    --card-bg: #FFFFFF;
+    --text-main: #222222;
+    --text-muted: #717171;
+    --accent-color: #FF385C;
+    /* Airbnb Red */
+    --accent-hover: #D90B3E;
+    --border-color: #DDDDDD;
+    --shadow-soft: 0 6px 16px rgba(0, 0, 0, 0.08);
+    --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.12);
+    --radius-lg: 16px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    margin: 0;
+    padding: 40px 20px;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+.app-container {
+    background-color: var(--card-bg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-soft);
+    padding: 32px;
+    width: 100%;
+    max-width: 900px;
+    transition: box-shadow 0.3s ease;
+}
+
+header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    margin-bottom: 24px;
+}
+
+header h1 {
+    font-weight: 700;
+    font-size: 24px;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+    position: absolute;
+    right: 0;
+    color: var(--text-muted);
+}
+
+.icon-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: var(--text-main);
+}
+
+.icon-btn.unlocked {
+    color: var(--accent-color);
+}
+
+/* Disabled state */
+body:not(.admin-enabled) .cleaning-badge {
+    pointer-events: none;
+    /* Disable removing */
+}
+
+body:not(.admin-enabled) .cleaning-badge:hover::after {
+    display: none;
+}
+
+body.admin-enabled .cleaning-badge {
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+body:not(.admin-enabled) .day:hover {
+    cursor: default;
+    background-color: white;
+    /* No hover effect */
+}
+
+/* Controls */
+.controls {
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 24px;
+}
+
+.controls-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.controls-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+#calendar-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-main);
+}
+
+.legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    /* border: 2px solid white; Optional visual pop */
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    /* Center text vertically */
+}
+
+.last-updated-text {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: var(--text-main);
+    /* Dark Button */
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+button:hover {
+    background-color: black;
+    transform: translateY(-1px);
+}
+
+.secondary-btn {
+    background-color: white;
+    color: var(--text-main);
+    border: 1px solid var(--text-main);
+}
+
+.secondary-btn:hover {
+    background-color: #f7f7f7;
+    color: black;
+}
+
+/* Hidden container */
+#properties-container.hidden {
+    display: none;
+}
+
+body.admin-enabled #properties-container.hidden {
+    /* Still keep it hidden by default, but maybe show the toggle button? 
+       Actually, let's just make the "Manage Properties" button visible in admin mode if we restore it, 
+       OR just show the container if we want simple logic.
+       
+       Let's restore the toggle button structure but hide it by default, showing it only in admin mode.
+    */
+}
+
+body.admin-enabled .admin-only-control {
+    display: block !important;
+}
+
+/* Ensure timestamp stacks or fits on mobile */
+@media (max-width: 768px) {
+    .action-buttons {
+        width: 100%;
+        justify-content: space-between;
+        flex-direction: column-reverse;
+        /* Put refresh btn on top or bottom? Let's keep side-by-side if poss, or stack */
+        gap: 8px;
+    }
+
+    .last-updated-text {
+        text-align: center;
+        font-size: 11px;
+    }
+
+    .action-buttons button {
+        flex: 1;
+        /* Full width buttons */
+        width: 100%;
+    }
+}
+
+/* Calendar Header */
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.calendar-header h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.calendar-header button {
+    background: transparent;
+    color: var(--text-main);
+    font-size: 18px;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.calendar-header button:hover {
+    border-color: var(--text-main);
+    background-color: transparent;
+}
+
+/* Calendar Grid */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 12px;
+    /* Open airy grid */
+}
+
+.day.header {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    text-align: center;
+    padding-bottom: 12px;
+    letter-spacing: 0.5px;
+}
+
+.day {
+    min-height: 100px;
+    /* Taller cells */
+    border-radius: var(--radius-md);
+    padding: 10px;
+    background-color: white;
+    /* No background usually */
+    border: 1px solid transparent;
+    /* Invisible border by default */
+    position: relative;
+    transition: background-color 0.2s;
+    display: flex;
+    flex-direction: column;
+}
+
+.day:hover {
+    background-color: #f7f7f7;
+    cursor: pointer;
+}
+
+.day-number {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-main);
+    margin-bottom: 6px;
+}
+
+.day.empty {
+    pointer-events: none;
+}
+
+/* Cleaning Badges */
+.cleaning-badge {
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 20px;
+    /* Pill shape */
+    margin-top: 4px;
+    display: inline-block;
+    font-weight: 600;
+    cursor: pointer;
+    position: relative;
+    user-select: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: transform 0.1s;
+    width: fit-content;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cleaning-badge:hover {
+    transform: scale(1.02);
+    z-index: 2;
+}
+
+.cleaning-badge:hover::after {
+    content: "×";
+    position: absolute;
+    right: 4px;
+    /* Inside the pill */
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.2);
+    color: white;
+    border-radius: 50%;
+    width: 14px;
+    height: 14px;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Modal */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    /* Glass effect */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+.modal:not(.hidden) {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal.hidden {
+    display: flex;
+    /* Override display:none to use opacity */
+}
+
+.modal-content {
+    background-color: var(--card-bg);
+    padding: 32px;
+    border-radius: var(--radius-lg);
+    width: 100%;
+    max-width: 360px;
+    box-shadow: var(--shadow-hover);
+    transform: translateY(20px);
+    transition: transform 0.2s ease;
+}
+
+.modal:not(.hidden) .modal-content {
+    transform: translateY(0);
+}
+
+.modal-content h3 {
+    margin-top: 0;
+    font-size: 20px;
+    margin-bottom: 8px;
+}
+
+.modal-content p {
+    color: var(--text-muted);
+    margin-bottom: 24px;
+}
+
+#modal-property-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.modal-prop-btn {
+    padding: 12px;
+    border: none;
+    border-radius: var(--radius-sm);
+    color: white;
+    cursor: pointer;
+    font-weight: 500;
+    text-align: center;
+    font-size: 14px;
+    transition: opacity 0.2s;
+    width: 100%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.modal-prop-btn:hover {
+    opacity: 0.9;
+}
