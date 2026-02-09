@@ -38,7 +38,9 @@ let manualCleanings = {};
 let removedCleanings = {};
 
 // Sync Logic
-const docRef = doc(db, "appData", "main");
+// SECURITY: We use a specific, nice-to-read but specific ID. 
+// Firestore Rules will ONLY allow access to this specific document.
+const docRef = doc(db, "appData", "airbnb_secure_calendar_2024");
 
 // Listen for updates
 onSnapshot(docRef, (doc) => {
