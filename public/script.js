@@ -1,3 +1,19 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
+import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDSFzaL06S0dFoNlt4j17tKzC96bg9HWeo",
+    authDomain: "airbnb-cleaner-app.firebaseapp.com",
+    projectId: "airbnb-cleaner-app",
+    storageBucket: "airbnb-cleaner-app.firebasestorage.app",
+    messagingSenderId: "298826636748",
+    appId: "1:298826636748:web:808e43eff3bb68d6301169"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
 const propertyList = document.getElementById('property-list');
 // const addPropertyBtn = document.getElementById('add-property'); // Kept in DOM structure but hidden
 const loadCalendarBtn = document.getElementById('load-calendar');
@@ -16,13 +32,59 @@ let calendarEvents = {};
 
 const colors = ['#FF5733', '#33FF57', '#3357FF', '#FF33A1', '#FFD700', '#00FFFF'];
 
-// State
-let properties = JSON.parse(localStorage.getItem('properties')) || [
-    { id: Date.now(), name: 'Property 1', url: '', color: colors[0] }
-];
+// State - Now synced from Firebase
+let properties = [];
+let manualCleanings = {};
+let removedCleanings = {};
+
+// Sync Logic
+const docRef = doc(db, "appData", "main");
+
+// Listen for updates
+onSnapshot(docRef, (doc) => {
+    if (doc.exists()) {
+        const data = doc.data();
+        properties = data.properties || [];
+        manualCleanings = data.manualCleanings || {};
+        removedCleanings = data.removedCleanings || {};
+
+        console.log("Data synced from Firebase!");
+
+        // Refresh UI
+        renderProperties();
+        renderLegend();
+        renderCalendar();
+
+        // Auto-fetch if properties exist and we haven't fetched yet? 
+        // Or just let user refresh. Let's trigger fetch if properties changed basically.
+        // For now, we rely on "Refresh Calendar" for iCal data, but local data updates instantly.
+    } else {
+        // Doc doesn't exist yet, initialize it?
+        // Only if we are admin maybe? Or just leave empty.
+        console.log("No remote data found, starting fresh.");
+    }
+});
+
+async function saveData() {
+    try {
+        await setDoc(docRef, {
+            properties: properties,
+            manualCleanings: manualCleanings,
+            removedCleanings: removedCleanings
+        });
+        console.log("Data saved to Firebase!");
+    } catch (e) {
+        console.error("Error saving to Firebase: ", e);
+        alert("Error saving data. Check console.");
+    }
+}
 
 function saveProperties() {
-    localStorage.setItem('properties', JSON.stringify(properties));
+    saveData();
+}
+
+function saveManualData() {
+    saveData();
 }
 
 function renderProperties() {
@@ -114,7 +176,6 @@ if (addPropertyBtn) {
 }
 
 loadCalendarBtn.addEventListener('click', () => {
-    console.log('Refresh button clicked');
     fetchAllCalendars();
 });
 
@@ -179,21 +240,7 @@ const modalPropertyList = document.getElementById('modal-property-list');
 const closeModalBtn = document.getElementById('close-modal');
 
 let selectedDateForManual = null; // 'YYYY-MM-DD'
-// Structure: { 'YYYY-MM-DD': [propertyId1, propertyId2] }
-// We store IDs of properties that have a manual cleaning on this date.
-let manualCleanings = JSON.parse(localStorage.getItem('manualCleanings')) || {};
-// Structure: { 'YYYY-MM-DD': [ { propertyName, originalEnd } ] } 
-// To implement "Remove", we can just track "removed events" by a unique key, 
-// OR just simple manual cleanings.
-// The user requirement "remove a cleaning on any day" implies removing AUTO cleanings too.
-// So we need a "removedEvents" store.
-// Key: 'YYYY-MM-DD|PropertyName' -> true if removed.
-let removedCleanings = JSON.parse(localStorage.getItem('removedCleanings')) || {};
-
-function saveManualData() {
-    localStorage.setItem('manualCleanings', JSON.stringify(manualCleanings));
-    localStorage.setItem('removedCleanings', JSON.stringify(removedCleanings));
-}
+// Removed local initialization as it depends on Firebase now
 
 // Helper to get unique key for event
 function getEventKey(dateStr, propertyName) {
