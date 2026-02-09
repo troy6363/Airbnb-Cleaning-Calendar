@@ -260,7 +260,7 @@ body.admin-enabled .admin-only-control {
 /* Calendar Grid */
 .calendar-grid {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: 12px;
     /* Open airy grid */
 }
@@ -325,6 +325,8 @@ body.admin-enabled .admin-only-control {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    vertical-align: middle;
+    /* Aligns correctly if standard block behavior fails */
 }
 
 .cleaning-badge:hover {
