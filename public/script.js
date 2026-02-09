@@ -1,20 +1,25 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
 import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
 
-const firebaseConfig = {
-    apiKey: "AIza" + "SyDSFzaL06S0dFoNlt4j17tKzC96bg9HWeo",
-    authDomain: "airbnb-cleaner-app.firebaseapp.com",
-    projectId: "airbnb-cleaner-app",
-    storageBucket: "airbnb-cleaner-app.firebasestorage.app",
-    messagingSenderId: "298826636748",
-    appId: "1:298826636748:web:808e43eff3bb68d6301169"
-};
+let app, db, docRef;
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+async function initApp() {
+    try {
+        const res = await fetch('/api/config');
+        if (!res.ok) throw new Error('Config fetch failed');
+        const firebaseConfig = await res.json();
 
-console.log("App loaded. Version: Secure Cloud 1.0");
+        app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        console.log("App loaded. Secure Mode.");
+
+        setupRealtimeSync();
+    } catch (e) {
+        console.error("Init Error:", e);
+    }
+}
+
+initApp();
 
 const propertyList = document.getElementById('property-list');
 // const addPropertyBtn = document.getElementById('add-property'); // Kept in DOM structure but hidden
@@ -39,35 +44,31 @@ let properties = [];
 let manualCleanings = {};
 let removedCleanings = {};
 
-// Sync Logic
-// SECURITY: We use a specific, nice-to-read but specific ID. 
-// Firestore Rules will ONLY allow access to this specific document.
-const docRef = doc(db, "appData", "airbnb_secure_calendar_2024");
+async function setupRealtimeSync() {
+    docRef = doc(db, "appData", "airbnb_secure_calendar_2024");
 
-// Listen for updates
-onSnapshot(docRef, (doc) => {
-    if (doc.exists()) {
-        const data = doc.data();
-        properties = data.properties || [];
-        manualCleanings = data.manualCleanings || {};
-        removedCleanings = data.removedCleanings || {};
+    onSnapshot(docRef, (docSnap) => {
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            properties = data.properties || [];
+            manualCleanings = data.manualCleanings || {};
+            removedCleanings = data.removedCleanings || {};
 
-        console.log("Data synced from Firebase!");
+            console.log("Data synced from Firebase!");
 
-        // Refresh UI
-        renderProperties();
-        renderLegend();
-        renderCalendar();
+            renderProperties();
+            renderLegend();
+            renderCalendar();
 
-        // Auto-fetch if properties exist and we haven't fetched yet? 
-        // Or just let user refresh. Let's trigger fetch if properties changed basically.
-        // For now, we rely on "Refresh Calendar" for iCal data, but local data updates instantly.
-    } else {
-        // Doc doesn't exist yet, initialize it?
-        // Only if we are admin maybe? Or just leave empty.
-        console.log("No remote data found, starting fresh.");
-    }
-});
+            // Auto-fetch if properties exist
+            if (properties.some(p => p.url)) {
+                fetchAllCalendars();
+            }
+        } else {
+            console.log("No remote data found, starting fresh.");
+        }
+    });
+}
 
 async function saveData() {
     try {
@@ -462,10 +463,7 @@ renderProperties();
 renderLegend();
 updateAdminUI();
 
-// Don't auto-fetch on load to save API calls/errors, let user click refresh or we can auto-fetch if URLs exist.
-if (properties.some(p => p.url)) {
-    fetchAllCalendars();
-}
+// Initial fetch handled in setupRealtimeSync now
 
 // Re-add updateAdminUI function definition correctly
 function updateAdminUI() {

@@ -6,3 +6,8 @@
   from = "/api/calendar"
   to = "/.netlify/functions/calendar"
   status = 200
+
+[[redirects]]
+  from = "/api/config"
+  to = "/.netlify/functions/get-config"
+  status = 200
