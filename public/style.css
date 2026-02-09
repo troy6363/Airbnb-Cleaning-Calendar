@@ -187,14 +187,7 @@ button:hover {
     display: none;
 }
 
-body.admin-enabled #properties-container.hidden {
-    /* Still keep it hidden by default, but maybe show the toggle button? 
-       Actually, let's just make the "Manage Properties" button visible in admin mode if we restore it, 
-       OR just show the container if we want simple logic.
-       
-       Let's restore the toggle button structure but hide it by default, showing it only in admin mode.
-    */
-}
+/* body.admin-enabled #properties-container.hidden removed (empty) */
 
 body.admin-enabled .admin-only-control {
     display: flex !important;
@@ -221,6 +214,26 @@ body.admin-enabled .admin-only-control {
         flex: 1;
         /* Full width buttons */
         width: 100%;
+    }
+
+    /* Mobile: Convert badges to dots */
+    .cleaning-badge {
+        width: 10px;
+        height: 10px;
+        padding: 0;
+        border-radius: 50%;
+        color: transparent !important;
+        /* Hide text */
+        overflow: hidden;
+        margin: 2px auto;
+        /* Center in cell */
+        display: block;
+        /* Ensure it takes its own line/space */
+    }
+
+    /* Hide the 'x' on mobile hover since it's touch */
+    .cleaning-badge:hover::after {
+        display: none;
     }
 }
 
