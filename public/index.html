@@ -22,9 +22,14 @@
                 <div id="calendar-legend">
                     <!-- Legend items generated here -->
                 </div>
-                <!-- Admin Only Toggle -->
-                <button id="toggle-properties" class="secondary-btn admin-only-control"
-                    style="display: none; margin-left: auto; margin-right: 10px;">Manage Properties</button>
+                <!-- Admin Only Controls -->
+                <div id="admin-controls" class="admin-only-control"
+                    style="display: none; margin-left: auto; margin-right: 10px;">
+                    <button id="export-data" class="secondary-btn" title="Download Backup">Export</button>
+                    <input type="file" id="import-data" style="display: none;" accept=".json">
+                    <button id="import-btn" class="secondary-btn" title="Restore Backup">Import</button>
+                    <button id="toggle-properties" class="secondary-btn">Manage Properties</button>
+                </div>
 
                 <div class="action-buttons">
                     <span id="last-updated" class="last-updated-text"></span>

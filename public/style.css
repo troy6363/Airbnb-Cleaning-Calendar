@@ -197,7 +197,9 @@ body.admin-enabled #properties-container.hidden {
 }
 
 body.admin-enabled .admin-only-control {
-    display: block !important;
+    display: flex !important;
+    gap: 8px;
+    align-items: center;
 }
 
 /* Ensure timestamp stacks or fits on mobile */

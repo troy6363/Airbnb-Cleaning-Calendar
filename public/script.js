@@ -433,21 +433,69 @@ adminLockBtn.addEventListener('click', () => {
     }
 });
 
-function updateAdminUI() {
-    if (isAdmin) {
-        document.body.classList.add('admin-enabled');
-        adminLockBtn.textContent = '🔓';
-        adminLockBtn.classList.add('unlocked');
-        adminLockBtn.title = "Lock Admin Mode";
-        // Show hidden properties container ONLY if explicitly needed? 
-        // User asked to hide properties PERMANENTLY, but admin might need to edit links.
-        // Let's make "Manage Properties" (toggle) accessible only in Admin mode if we bring it back.
-        // For now, per strict request "permanently hide", we follow that.
-        // But logic for add/remove cleaning is now guarded by CSS pointer-events and JS checks.
-    } else {
-        document.body.classList.remove('admin-enabled');
-        adminLockBtn.textContent = '🔒';
-        adminLockBtn.classList.remove('unlocked');
-        adminLockBtn.title = "Unlock Admin Mode";
-    }
+// Data Migration Logic
+const exportBtn = document.getElementById('export-data');
+const importBtn = document.getElementById('import-btn');
+const importInput = document.getElementById('import-data');
+
+if (exportBtn) {
+    exportBtn.addEventListener('click', () => {
+        const data = {
+            properties: properties,
+            manualCleanings: manualCleanings,
+            removedCleanings: removedCleanings,
+            timestamp: new Date().toISOString()
+        };
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", "airbnb_calendar_backup.json");
+        document.body.appendChild(downloadAnchorNode); // Required for firefox
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+    });
+}
+
+if (importBtn && importInput) {
+    importBtn.addEventListener('click', () => {
+        importInput.click();
+    });
+
+    importInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            try {
+                const jsonObj = JSON.parse(event.target.result);
+                if (jsonObj.properties && jsonObj.manualCleanings) {
+                    if (confirm(`Restore backup from ${new Date(jsonObj.timestamp).toLocaleString()}? This will overwrite current data.`)) {
+                        properties = jsonObj.properties;
+                        manualCleanings = jsonObj.manualCleanings;
+                        removedCleanings = jsonObj.removedCleanings || {};
+
+                        saveProperties();
+                        saveManualData();
+
+                        // Re-render
+                        renderProperties();
+                        renderLegend();
+                        renderCalendar();
+                        fetchAllCalendars(); // Fetch fresh data
+
+                        alert('Backup restored successfully!');
+                    }
+                } else {
+                    alert('Invalid backup file format.');
+                }
+            } catch (err) {
+                console.error('Error importing data:', err);
+                alert('Failed to parse backup file.');
+            }
+        };
+        reader.readAsText(file);
+        // Reset input so same file can be selected again if needed
+        importInput.value = '';
+    });
 }
