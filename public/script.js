@@ -14,6 +14,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+console.log("App loaded. Version: Secure Cloud 1.0");
+
 const propertyList = document.getElementById('property-list');
 // const addPropertyBtn = document.getElementById('add-property'); // Kept in DOM structure but hidden
 const loadCalendarBtn = document.getElementById('load-calendar');
