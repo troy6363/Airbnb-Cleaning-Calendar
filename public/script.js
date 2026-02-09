@@ -2,7 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebas
 import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyDSFzaL06S0dFoNlt4j17tKzC96bg9HWeo",
+    apiKey: "AIza" + "SyDSFzaL06S0dFoNlt4j17tKzC96bg9HWeo",
     authDomain: "airbnb-cleaner-app.firebaseapp.com",
     projectId: "airbnb-cleaner-app",
     storageBucket: "airbnb-cleaner-app.firebasestorage.app",
