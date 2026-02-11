@@ -272,6 +272,12 @@ function parseICal(data, property) {
 
             console.log(`Parsed Event: ${event.summary} ending on ${dateStr} (Raw: ${event.endDate})`);
 
+            // Filter out "Blocked" events which are just calendar availability blocks, not actual reservations requiring cleaning
+            if (event.summary && event.summary.toLowerCase().includes('blocked')) {
+                console.log(`Skipping Blocked event: ${dateStr}`);
+                return;
+            }
+
             // Check if this specific cleaning was manually removed
             if (removedCleanings[getEventKey(dateStr, property.name)]) {
                 return; // Skip adding this event
