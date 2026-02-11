@@ -263,10 +263,14 @@ function parseICal(data, property) {
             const event = new ICAL.Event(vevent);
             let cleaningDate = event.endDate.toJSDate();
 
-            const yyyy = cleaningDate.getFullYear();
-            const mm = String(cleaningDate.getMonth() + 1).padStart(2, '0');
-            const dd = String(cleaningDate.getDate()).padStart(2, '0');
+            // Use UTC methods to ensure consistent date handling relative to the iCal data
+            // preventing local timezone shifts (e.g. 00:00:00 becoming 23:00:00 previous day)
+            const yyyy = cleaningDate.getUTCFullYear();
+            const mm = String(cleaningDate.getUTCMonth() + 1).padStart(2, '0');
+            const dd = String(cleaningDate.getUTCDate()).padStart(2, '0');
             const dateStr = `${yyyy}-${mm}-${dd}`;
+
+            console.log(`Parsed Event: ${event.summary} ending on ${dateStr} (Raw: ${event.endDate})`);
 
             // Check if this specific cleaning was manually removed
             if (removedCleanings[getEventKey(dateStr, property.name)]) {
