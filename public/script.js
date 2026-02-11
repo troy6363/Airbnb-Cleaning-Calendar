@@ -55,6 +55,7 @@ async function setupRealtimeSync() {
             removedCleanings = data.removedCleanings || {};
 
             console.log("Data synced from Firebase!");
+            console.log("Synced Manual Cleanings:", manualCleanings); // Debugging log
 
             renderProperties();
             renderLegend();
