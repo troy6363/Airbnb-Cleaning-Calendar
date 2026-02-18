@@ -43,6 +43,7 @@ const colors = ['#FF5733', '#33FF57', '#3357FF', '#FF33A1', '#FFD700', '#00FFFF'
 let properties = [];
 let manualCleanings = {};
 let removedCleanings = {};
+let cachedCleanings = {}; // { "eventKey": { dateStr, propertyName, type: 'auto', lastSeen: timestamp } }
 
 async function setupRealtimeSync() {
     docRef = doc(db, "appData", "airbnb_secure_calendar_2024");
@@ -53,6 +54,7 @@ async function setupRealtimeSync() {
             properties = data.properties || [];
             manualCleanings = data.manualCleanings || {};
             removedCleanings = data.removedCleanings || {};
+            cachedCleanings = data.cachedCleanings || {};
 
             console.log("Data synced from Firebase!");
             console.log("Synced Manual Cleanings:", manualCleanings); // Debugging log
@@ -213,10 +215,63 @@ async function fetchAllCalendars() {
     });
 
     await Promise.all(promises);
+
+    // Prune cache: Remove future events that are no longer in the feed (Cancellations)
+    // Keep past events even if they are gone from the feed (History)
+    const now = new Date();
+    const todayStr = now.toISOString().split('T')[0];
+
+    const validCache = {};
+
+    // First, add fresh events to cache
+    Object.keys(calendarEvents).forEach(dateStr => {
+        calendarEvents[dateStr].forEach(evt => {
+            if (evt.type === 'auto') {
+                const key = getEventKey(dateStr, evt.propertyName);
+                validCache[key] = {
+                    dateStr: dateStr,
+                    propertyName: evt.propertyName,
+                    color: evt.color,
+                    type: 'auto',
+                    lastSeen: new Date().toISOString()
+                };
+            }
+        });
+    });
+
+    // Now merge/prune existing cache
+    Object.keys(cachedCleanings).forEach(key => {
+        const cachedEvt = cachedCleanings[key];
+        // If we just added it to validCache (it was in the feed), good.
+        if (validCache[key]) return;
+
+        // If not in feed, check date
+        if (cachedEvt.dateStr < todayStr) {
+            // Keep past event
+            validCache[key] = cachedEvt;
+
+            // Add to display if not already there (it wouldn't be, because we gathered from fresh feed)
+            if (!calendarEvents[cachedEvt.dateStr]) {
+                calendarEvents[cachedEvt.dateStr] = [];
+            }
+            // Double check duplicates shouldn't happen logic-wise if keys are unique
+            calendarEvents[cachedEvt.dateStr].push({
+                propertyName: cachedEvt.propertyName,
+                color: cachedEvt.color,
+                type: 'auto' // Display as auto
+            });
+        } else {
+            // Future event missing from feed -> Cancellation. Drop from cache.
+            console.log(`Removing cancelled event: ${cachedEvt.propertyName} on ${cachedEvt.dateStr}`);
+        }
+    });
+
+    cachedCleanings = validCache;
+    saveData(); // Persist updated cache
+
     renderCalendar();
 
     // Update Last Updated Timestamp
-    const now = new Date();
     const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const lastUpdatedEl = document.getElementById('last-updated');
     if (lastUpdatedEl) {
@@ -519,6 +574,7 @@ if (exportBtn) {
             properties: properties,
             manualCleanings: manualCleanings,
             removedCleanings: removedCleanings,
+            cachedCleanings: cachedCleanings,
             timestamp: new Date().toISOString()
         };
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
@@ -549,6 +605,7 @@ if (importBtn && importInput) {
                         properties = jsonObj.properties;
                         manualCleanings = jsonObj.manualCleanings;
                         removedCleanings = jsonObj.removedCleanings || {};
+                        cachedCleanings = jsonObj.cachedCleanings || {};
 
                         saveProperties();
                         saveManualData();
