@@ -45,6 +45,10 @@ let manualCleanings = {};
 let removedCleanings = {};
 let cachedCleanings = {}; // { "eventKey": { dateStr, propertyName, type: 'auto', lastSeen: timestamp } }
 
+// Guards to prevent infinite loop: onSnapshot -> fetchAllCalendars -> saveData -> onSnapshot
+let isFetching = false;
+let initialLoadDone = false;
+
 async function setupRealtimeSync() {
     docRef = doc(db, "appData", "airbnb_secure_calendar_2024");
 
@@ -57,14 +61,15 @@ async function setupRealtimeSync() {
             cachedCleanings = data.cachedCleanings || {};
 
             console.log("Data synced from Firebase!");
-            console.log("Synced Manual Cleanings:", manualCleanings); // Debugging log
 
             renderProperties();
             renderLegend();
             renderCalendar();
 
-            // Auto-fetch if properties exist
-            if (properties.some(p => p.url)) {
+            // Only auto-fetch on the FIRST load, not on every save
+            // This prevents the infinite loop: onSnapshot -> fetch -> save -> onSnapshot
+            if (!initialLoadDone && !isFetching && properties.some(p => p.url)) {
+                initialLoadDone = true;
                 fetchAllCalendars();
             }
         } else {
@@ -78,7 +83,8 @@ async function saveData() {
         await setDoc(docRef, {
             properties: properties,
             manualCleanings: manualCleanings,
-            removedCleanings: removedCleanings
+            removedCleanings: removedCleanings,
+            cachedCleanings: cachedCleanings
         });
         console.log("Data saved to Firebase!");
     } catch (e) {
@@ -184,6 +190,7 @@ if (addPropertyBtn) {
 }
 
 loadCalendarBtn.addEventListener('click', () => {
+    isFetching = false; // Allow manual refresh even if a previous fetch completed
     fetchAllCalendars();
 });
 
@@ -198,6 +205,8 @@ nextMonthBtn.addEventListener('click', () => {
 });
 
 async function fetchAllCalendars() {
+    if (isFetching) return; // Prevent re-entrant calls
+    isFetching = true;
     calendarEvents = {}; // Reset events
 
     const promises = properties.map(async (prop) => {
@@ -267,7 +276,8 @@ async function fetchAllCalendars() {
     });
 
     cachedCleanings = validCache;
-    saveData(); // Persist updated cache
+    await saveData(); // Persist updated cache
+    isFetching = false;
 
     renderCalendar();
 
